@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AMS Login</title>
+
+    <style>
+
+        body{
+            font-family:Arial;
+            background:#f4f4f4;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .login-box{
+            background:white;
+            padding:30px;
+            width:350px;
+            border-radius:10px;
+            box-shadow:0px 0px 15px rgba(0,0,0,0.2);
+        }
+
+        input{
+            width:100%;
+            padding:10px;
+            margin:10px 0;
+        }
+
+        button{
+            width:100%;
+            padding:10px;
+            background:#007bff;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="login-box">
+
+    <h2>Asset Management Login</h2>
+
+    <div th:if="${param.logout}" id="logout-alert" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; text-align: center; font-size: 0.9rem; font-weight: 500; transition: opacity 0.5s ease;">
+        You have been successfully logged out.
+    </div>
+
+    <script>
+        // 2. Wait for the page DOM to fully load
+        document.addEventListener("DOMContentLoaded", function() {
+            const logoutAlert = document.getElementById("logout-alert");
+
+            if (logoutAlert) {
+                // Wait 4000 milliseconds (4 seconds), then fade out and remove
+                setTimeout(function() {
+                    logoutAlert.style.opacity = "0"; // Smooth fade transition
+
+                    // Completely remove from document flow after fade finishes (500ms)
+                    setTimeout(function() {
+                        logoutAlert.style.display = "none";
+                    }, 500);
+                }, 4000);
+            }
+        });
+    </script>
+    <form action="/login" method="post">
+
+        <input type="email"
+               name="email"
+               placeholder="Email">
+
+        <input type="password"
+               name="password"
+               placeholder="Password">
+
+        <button type="submit">
+            Login
+        </button>
+
+    </form>
+
+
+
+</div>
+<div id="splash-screen">
+    <div class="logo-container">
+        <img th:src="@{/images/r2bsystemlogo.jpeg}" alt="App Logo" class="animated-splash-logo">
+        <h1 class="splash-text">AssetManagement</h1>
+
+        <div class="loading-ring"></div>
+    </div>
+</div>
+
+<style>
+    /* Fullscreen dark or light modern overlay block */
+    #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #2c3e50; /* A dark slate backdrop that looks great with glowing logos */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Keeps it on top of all navbars and components */
+        opacity: 1;
+        transition: opacity 0.4s ease-in-out, visibility 0.4s;
+    }
+
+    .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    /* Styles and animates your custom uploaded image logo */
+    .animated-splash-logo {
+        width: 120px; /* Adjust size as needed */
+        height: auto;
+        margin-bottom: 20px;
+        filter: drop-shadow(0px 0px 15px rgba(52, 152, 219, 0.6)); /* Gives your image a sleek glow */
+        animation: logoPulse 2s ease-in-out infinite;
+    }
+
+    /* Text presentation styling */
+    .splash-text {
+        margin: 0 0 20px 0;
+        font-family: 'Segoe UI', -apple-system, sans-serif;
+        font-size: 1.8rem;
+        color: #ffffff;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+    }
+
+    /* Subtle circular loading wheel indicator */
+    .loading-ring {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #3498db; /* Matches dashboard primary highlights */
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    /* Keyframe Animations */
+    @keyframes logoPulse {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0px 0px 10px rgba(52, 152, 219, 0.4));
+        }
+        50% {
+            transform: scale(1.06);
+            filter: drop-shadow(0px 0px 25px rgba(52, 152, 219, 0.8));
+        }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Class toggled via JS to smoothly fade out the loading overlay */
+    .splash-fade-out {
+        opacity: 0 !important;
+        visibility: hidden;
+    }
+</style>
+<script>
+    window.addEventListener('load', function () {
+        const splash = document.getElementById('splash-screen');
+
+        // Optional: Wrap in a tiny timeout (e.g. 800ms) if your page loads *too* fast
+        // and you want to ensure users get a chance to appreciate the animation.
+        setTimeout(function() {
+            splash.classList.add('splash-fade-out');
+        }, 800);
+    });
+</script>
+</body>
+</html>

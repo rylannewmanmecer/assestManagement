@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Approvals Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --header-bg: #605ca8; /* Unique Purple Identity for Managers */
+            --text-color: #333;
+            --card-pending: #f39c12;
+            --card-approved: #00a65a;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-color);
+        }
+        .navbar {
+            background-color: var(--header-bg); color: white; padding: 15px 20px;
+            font-size: 1.2rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logout-btn {
+            color: white; text-decoration: none; font-size: 0.9rem; background: rgba(255,255,255,0.2);
+            padding: 6px 12px; border-radius: 3px;
+        }
+        .container { padding: 30px; max-width: 1400px; margin: 0 auto; }
+        h1 { margin-top: 0; font-weight: 400; font-size: 1.8rem; margin-bottom: 20px; }
+
+        .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px; margin-bottom: 30px;
+        }
+        .card { color: white; padding: 15px; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+        .card h2 { font-size: 2.5rem; margin: 0; font-weight: bold; }
+        .card p { margin: 5px 0 0 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
+        .bg-pending { background-color: var(--card-pending); }
+        .bg-approved { background-color: var(--card-approved); }
+
+        .table-container { background: white; padding: 20px; border-radius: 3px; border-top: 3px solid var(--header-bg); box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #f4f4f4; vertical-align: middle; }
+        th { background-color: #fafafa; color: #555; font-weight: 600; }
+
+        .status-badge { color: white; padding: 4px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: bold; display: inline-block; }
+        .btn-approve { background-color: #00a65a; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: 600; }
+        .btn-deny { background-color: #dd4b39; color: white; border: none; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-weight: 600; }
+        .btn-approve:hover, .btn-deny:hover { opacity: 0.9; }
+        .action-cell { display: flex; gap: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <span>Manager Workspace</span>
+    <a th:href="@{/logout}"
+       style="color: white; background-color: #d9534f; padding: 6px 14px; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 0.9rem;">
+        Sign Out
+    </a>
+</div>
+
+<div class="container">
+    <h1>Loan Authorizations Desk</h1>
+
+    <div class="dashboard-grid">
+        <div class="card bg-pending">
+            <h2 th:text="${pendingCount}">0</h2>
+            <p>Awaiting Decision</p>
+        </div>
+        <div class="card bg-approved">
+            <h2 th:text="${activeLoansCount}">0</h2>
+            <p>Active Borrowed Items</p>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h3>Incoming Loan Request Registry</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Asset ID</th>
+                <th>Preview</th>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Requested By</th>
+                <th>Current Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(managedAssets)}">
+                <td colspan="7" style="text-align: center; color: #888; padding: 30px;">No loan requests currently require review.</td>
+            </tr>
+
+            <tr th:each="asset : ${managedAssets}">
+                <td th:text="${asset.assetId}">IT-1001</td>
+                <td>
+                    <img th:src="${asset.imagePath}" alt="Thumbnail" style="width: 55px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                </td>
+                <td th:text="${asset.assetName}">Dell Laptop</td>
+                <td th:text="${asset.category}">IT Equipment</td>
+                <td th:text="${asset.requestedBy != null ? asset.requestedBy.fullname : 'Unassigned'}">Employee Name</td>
+                <td>
+                    <span th:if="${asset.status == 'Pending Approval'}" class="status-badge" style="background-color: #f39c12;">Pending Approval</span>
+                    <span th:if="${asset.status == 'Checked Out'}" class="status-badge" style="background-color: #00a65a;">Checked Out</span>
+                </td>
+                <td>
+                    <div class="action-cell" th:if="${asset.status == 'Pending Approval'}">
+                        <form th:action="@{/manager/assets/approve}" method="POST" style="margin:0;">
+                            <input type="hidden" name="assetId" th:value="${asset.assetId}">
+                            <button type="submit" class="btn-approve">Approve</button>
+                        </form>
+                        <form th:action="@{/manager/assets/deny}" method="POST" style="margin:0;">
+                            <input type="hidden" name="assetId" th:value="${asset.assetId}">
+                            <button type="submit" class="btn-deny">Deny</button>
+                        </form>
+                    </div>
+                    <span th:if="${asset.status == 'Checked Out'}" style="color: #777; font-size: 0.9rem; font-style: italic;">No actions required</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
