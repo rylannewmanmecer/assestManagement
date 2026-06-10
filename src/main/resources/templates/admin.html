@@ -141,9 +141,7 @@
     <div class="dashboard-grid">
         <div class="card bg-assets"><h2 th:text="${totalAssets}">0</h2><p>assets</p></div>
         <div class="card bg-licenses"><h2 th:text="${totalLicenses}">0</h2><p>licenses</p></div>
-        <div class="card bg-accessories"><h2 th:text="${totalAccessories}">0</h2><p>accessories</p></div>
-        <div class="card bg-consumables"><h2 th:text="${totalConsumables}">0</h2><p>consumables</p></div>
-        <div class="card bg-components"><h2>0</h2><p>components</p></div>
+
         <div class="card bg-people"><h2 th:text="${totalPeople}">1</h2><p>people</p></div>
     </div>
 
@@ -152,8 +150,7 @@
         <div class="btn-group">
             <button class="btn-asset" onclick="openCreateModal('ASSET', 'Add New Asset')">New Asset</button>
             <button class="btn-license" onclick="openCreateModal('LICENSE', 'Add New License')">New License</button>
-            <button class="btn-accessory" onclick="openCreateModal('ACCESSORY', 'Add New Accessory')">New Accessory</button>
-            <button class="btn-consumable" onclick="openCreateModal('CONSUMABLE', 'Add New Consumables')">New Consumables</button>
+
             <button class="btn-edit" onclick="triggerEditFromSelection()">Edit Selected</button>
             <button class="btn-delete" onclick="triggerDeleteFromSelection()">Delete Selected Asset</button>
         </div>

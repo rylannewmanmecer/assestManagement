@@ -1,46 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>AMS Login</title>
 
     <style>
-
-        body{
-            font-family:Arial;
-            background:#f4f4f4;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
-        .login-box{
-            background:white;
-            padding:30px;
-            width:350px;
-            border-radius:10px;
-            box-shadow:0px 0px 15px rgba(0,0,0,0.2);
+        .login-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
+            z-index: 1; /* Keeps form structural elements accessible beneath splash fade out layers */
         }
 
-        input{
-            width:100%;
-            padding:10px;
-            margin:10px 0;
+        .login-box h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            color: #333;
+            text-align: center;
         }
 
-        button{
-            width:100%;
-            padding:10px;
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Prevents input padding from stretching the layout border */
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        /* Modern error alert banner styling */
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        /* Dynamic input text area highlight on validation failure */
+        .input-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+
+        /* Fullscreen dark modern overlay block */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #2c3e50; /* A dark slate backdrop that looks great with glowing logos */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* Keeps it on top of all navbars and components */
+            opacity: 1;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Styles and animates your custom uploaded image logo */
+        .animated-splash-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0px 0px 15px rgba(52, 152, 219, 0.6)); /* Gives your image a sleek glow */
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        /* Text presentation styling */
+        .splash-text {
+            margin: 0 0 20px 0;
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            font-size: 1.8rem;
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+        }
+
+        /* Subtle circular loading wheel indicator */
+        .loading-ring {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db; /* Matches dashboard primary highlights */
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Keyframe Animations */
+        @keyframes logoPulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0px 0px 10px rgba(52, 152, 219, 0.4));
+            }
+            50% {
+                transform: scale(1.06);
+                filter: drop-shadow(0px 0px 25px rgba(52, 152, 219, 0.8));
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Class toggled via JS to smoothly fade out the loading overlay */
+        .splash-fade-out {
+            opacity: 0 !important;
+            visibility: hidden;
+        }
     </style>
-
 </head>
 <body>
+
+<div id="splash-screen">
+    <div class="logo-container">
+        <img th:src="@{/images/r2bsystemlogo.jpeg}" alt="App Logo" class="animated-splash-logo">
+        <h1 class="splash-text">AssetManagement</h1>
+        <div class="loading-ring"></div>
+    </div>
+</div>
 
 <div class="login-box">
 
@@ -50,137 +170,54 @@
         You have been successfully logged out.
     </div>
 
-    <script>
-        // 2. Wait for the page DOM to fully load
-        document.addEventListener("DOMContentLoaded", function() {
-            const logoutAlert = document.getElementById("logout-alert");
+    <div class="alert-error" th:if="${loginError}">
+        <span th:text="${error}">Invalid Email or Password</span>
+    </div>
 
-            if (logoutAlert) {
-                // Wait 4000 milliseconds (4 seconds), then fade out and remove
-                setTimeout(function() {
-                    logoutAlert.style.opacity = "0"; // Smooth fade transition
-
-                    // Completely remove from document flow after fade finishes (500ms)
-                    setTimeout(function() {
-                        logoutAlert.style.display = "none";
-                    }, 500);
-                }, 4000);
-            }
-        });
-    </script>
-    <form action="/login" method="post">
+    <form th:action="@{/login}" method="post">
 
         <input type="email"
                name="email"
-               placeholder="Email">
+               th:value="${attemptedEmail}"
+               th:classappend="${loginError} ? 'input-error' : ''"
+               placeholder="Email" required>
 
         <input type="password"
                name="password"
-               placeholder="Password">
+               th:classappend="${loginError} ? 'input-error' : ''"
+               placeholder="Password" required>
 
         <button type="submit">
             Login
         </button>
 
     </form>
-
-
-
-</div>
-<div id="splash-screen">
-    <div class="logo-container">
-        <img th:src="@{/images/r2blogo.png}" alt="App Logo" class="animated-splash-logo">
-        <h1 class="splash-text">AssetManagement</h1>
-
-        <div class="loading-ring"></div>
-    </div>
 </div>
 
-<style>
-    /* Fullscreen dark or light modern overlay block */
-    #splash-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #2c3e50; /* A dark slate backdrop that looks great with glowing logos */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999; /* Keeps it on top of all navbars and components */
-        opacity: 1;
-        transition: opacity 0.4s ease-in-out, visibility 0.4s;
-    }
-
-    .logo-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    /* Styles and animates your custom uploaded image logo */
-    .animated-splash-logo {
-        width: 120px; /* Adjust size as needed */
-        height: auto;
-        margin-bottom: 20px;
-        filter: drop-shadow(0px 0px 15px rgba(52, 152, 219, 0.6)); /* Gives your image a sleek glow */
-        animation: logoPulse 2s ease-in-out infinite;
-    }
-
-    /* Text presentation styling */
-    .splash-text {
-        margin: 0 0 20px 0;
-        font-family: 'Segoe UI', -apple-system, sans-serif;
-        font-size: 1.8rem;
-        color: #ffffff;
-        font-weight: 600;
-        letter-spacing: 1.5px;
-    }
-
-    /* Subtle circular loading wheel indicator */
-    .loading-ring {
-        width: 32px;
-        height: 32px;
-        border: 3px solid rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        border-top-color: #3498db; /* Matches dashboard primary highlights */
-        animation: spin 1s ease-in-out infinite;
-    }
-
-    /* Keyframe Animations */
-    @keyframes logoPulse {
-        0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0px 0px 10px rgba(52, 152, 219, 0.4));
-        }
-        50% {
-            transform: scale(1.06);
-            filter: drop-shadow(0px 0px 25px rgba(52, 152, 219, 0.8));
-        }
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    /* Class toggled via JS to smoothly fade out the loading overlay */
-    .splash-fade-out {
-        opacity: 0 !important;
-        visibility: hidden;
-    }
-</style>
 <script>
+    // 1. Automatically dismisses the logout alert banner after 4 seconds
+    document.addEventListener("DOMContentLoaded", function() {
+        const logoutAlert = document.getElementById("logout-alert");
+        if (logoutAlert) {
+            setTimeout(function() {
+                logoutAlert.style.opacity = "0";
+                setTimeout(function() {
+                    logoutAlert.style.display = "none";
+                }, 500);
+            }, 4000);
+        }
+    });
+
+    // 2. Clear out the Splash screen overlay window as soon as static layouts resolve
     window.addEventListener('load', function () {
         const splash = document.getElementById('splash-screen');
-
-        // Optional: Wrap in a tiny timeout (e.g. 800ms) if your page loads *too* fast
-        // and you want to ensure users get a chance to appreciate the animation.
-        setTimeout(function() {
-            splash.classList.add('splash-fade-out');
-        }, 800);
+        if (splash) {
+            setTimeout(function() {
+                splash.classList.add('splash-fade-out');
+            }, 800);
+        }
     });
 </script>
+
 </body>
 </html>

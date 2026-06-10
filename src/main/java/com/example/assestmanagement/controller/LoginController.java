@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Optional;
+
 @Controller
 public class LoginController {
 
@@ -28,9 +30,12 @@ public class LoginController {
             HttpSession session,
             Model model) {
 
-        User user = userRepository.findByEmail(email);
+        // Use the native crypto query from your UserRepository to check email and hashed password
+        Optional<User> validUser = userRepository.checkCredentials(email, password);
 
-        if (user != null && user.getPassword().equals(password)) {
+        if (validUser.isPresent()) {
+            User user = validUser.get();
+
             // Store the user identity context inside the HTTP session tracking layer
             session.setAttribute("loggedInUserEmail", user.getEmail());
             session.setAttribute("userRole", user.getRole());
@@ -46,8 +51,11 @@ public class LoginController {
             return "redirect:/home";
         }
 
-        // Safe failure state routing
+        // Failure state: Pass flags back to Thymeleaf frontend for UI rendering
+        model.addAttribute("loginError", true);
+        model.addAttribute("attemptedEmail", email);
         model.addAttribute("error", "Invalid Email or Password");
+
         return "login";
     }
 
@@ -60,6 +68,7 @@ public class LoginController {
         // Redirect back to the login screen with a clean slate
         return "redirect:/?logout=true";
     }
+
     // Display the registration form ONLY to an authenticated admin
     @GetMapping("/admin/register")
     public String showRegisterPage(HttpSession session) {
@@ -85,10 +94,16 @@ public class LoginController {
             return "redirect:/";
         }
 
-        // Your existing user creation/saving registration logic goes here
-        // Example:
-        // User newUser = new User(fullname, email, password, "USER");
-        // userRepository.save(newUser);
+        // New accounts saved here will trigger your database's 'trg_hash_password'
+        // automatically, protecting the user's plain text input!
+        User newUser = new User();
+        newUser.setFullname(fullname);
+        newUser.setEmail(email);
+        newUser.setPassword(password); // Sent raw; PostgreSQL intercepts and hashes it
+        newUser.setRole("USER"); // Default fallback profile tier
+
+        userRepository.save(newUser);
+
 
         return "redirect:/admin?registrationSuccess=true"; // Redirect back to admin console area
     }
