@@ -40,7 +40,7 @@ public class HomeController {
         model.addAttribute("assets", assetsList);
         model.addAttribute("totalAssets", totalAssetsCount);
 
-        return "home"; // This loads your templates/home.html file
+        return "index"; // This loads your templates/index.html file
     }
 
 
